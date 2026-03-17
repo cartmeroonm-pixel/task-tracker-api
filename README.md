@@ -168,8 +168,8 @@ task_tracker/
 
 ## 🔹 Контакты / Автор
 
-Имя: Твой ник/имя
+Имя: Дмитрий (Neverdebug)
 
-GitHub: ссылка
+GitHub: https://github.com/cartmeroonm-pixel
 
 Цель проекта: портфолио для junior backend разработчика
