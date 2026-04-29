@@ -1,163 +1,173 @@
 # Task Tracker API
 
-Простой backend для управления проектами и задачами с использованием Django REST Framework и PostgreSQL.
+- 🇬🇧 English | 🇷🇺 [Русский](README.ru.md)
+
+REST API for project and task management built with Django REST Framework + PostgreSQL.
 
 ---
 
-## 🔹 Технологии
+## 🚀 Features
 
-- Python 3.11+ (в Docker используется Python 3.11)
-- Django (см. `requirements.txt`)
-- Django REST Framework 3.16.1 
-- PostgreSQL  
-- Docker + docker-compose  
-- JWT авторизация  
-
----
-
-## 🔹 Функциональность
-
-- CRUD для проектов и задач  
-- Авторизация через JWT  
-- Object-level permissions (пользователь видит только свои проекты/задачи)  
-- Статусы задач: `todo`, `in_progress`, `done`  
-- Docker-контейнеризация с Postgres  
+- JWT authentication (access / refresh tokens)
+- Full CRUD for projects and tasks
+- Task statuses: `todo`, `in_progress`, `done`
+- Nested endpoints: tasks scoped to a project (`/api/projects/{id}/tasks/`)
+- Task filtering by project and status
+- Search across projects and tasks
+- Pagination
+- User-based data isolation (each user sees only their own projects and tasks)
+- Dockerized setup
 
 ---
 
-## 🔹 Установка и запуск (Docker)
+## 🧱 Tech Stack
 
-1. Клонировать репозиторий:
-
-```bash
-git clone <URL-репозитория>
-cd task_tracker
-```
-
-2. Создать `.env` в корне проекта (можно взять за основу `.env.example`):
-
-```env
-DEBUG=True
-SECRET_KEY=your_secret_key
-
-DB_NAME=task_tracker
-DB_USER=postgres
-DB_PASSWORD=your_db_password
-DB_HOST=db
-DB_PORT=5432
-```
-
-Важно: значения `DB_NAME/DB_USER/DB_PASSWORD` используются и приложением, и контейнером Postgres (см. `docker-compose.yml`).
-
-3. Запустить проект через Docker:
-
-```bash
-docker-compose up --build
-```
-
-4. Применить миграции (один раз):
-
-```bash
-docker-compose exec web python manage.py migrate
-```
-
-5. Создать суперпользователя (один раз):
-
-```bash
-docker-compose exec web python manage.py createsuperuser
-```
-
-6. API доступно по адресам:
-
-```bash
-http://localhost:8000/api/projects/
-http://localhost:8000/api/tasks/
-```
+- Python 3.11+
+- Django + Django REST Framework 3.16
+- PostgreSQL
+- SimpleJWT
+- Docker + Docker Compose
 
 ---
 
-## 🔹 Примеры запросов
+## 🔐 Authentication
 
-### Получение JWT токена
+This project uses JWT authentication.
 
-```bash
-POST http://localhost:8000/api/token/
+### Get token:
 ```
-
-Body:
-
+POST /api/token/
+```
 ```json
 {
-  "username": "admin",
-  "password": "your_password"
+  "username": "user",
+  "password": "password"
 }
 ```
 
-### CRUD проекты
-
-```bash
-GET http://localhost:8000/api/projects/
-POST http://localhost:8000/api/projects/
+### Refresh token:
+```
+POST /api/token/refresh/
 ```
 
-Body: 
-
-```json
-{
-    "name": "Новый проект"
-}
+Include the token in every request:
 ```
-
-### CRUD задачи
-
-```bash
-GET http://localhost:8000/api/tasks/
-POST http://localhost:8000/api/tasks/
-```
-
-Body: 
-
-```json
-{
-    "title": "Новая задача",
-    "project": 1
-}
-```
-
-Не забудьте добавить Bearer Token в заголовок `Authorization`.
-
-Пример заголовка:
-
-```bash
 Authorization: Bearer <access_token>
 ```
 
 ---
 
-## 🔹 Эндпоинты и полезные возможности
+## 📂 API Endpoints
 
-- **JWT**:
-  - `POST /api/token/` — получить пару токенов
-  - `POST /api/token/refresh/` — обновить access по refresh
-- **Проекты**: `GET/POST /api/projects/`, `GET/PUT/PATCH/DELETE /api/projects/{id}/`
-- **Задачи**: `GET/POST /api/tasks/`, `GET/PUT/PATCH/DELETE /api/tasks/{id}/`
-- **Задачи проекта (nested)**: `GET /api/projects/{id}/tasks/`
-- **Фильтры задач**: `GET /api/tasks/?project=<id>&status=todo`
-- **Поиск**:
-  - проекты: `GET /api/projects/?search=<name>`
-  - задачи: `GET /api/tasks/?search=<text>`
-- **Пагинация**: включена, параметр `page` (пример: `GET /api/tasks/?page=2`)
+### Projects
+```
+GET     /api/projects/
+POST    /api/projects/
+GET     /api/projects/{id}/
+PUT     /api/projects/{id}/
+PATCH   /api/projects/{id}/
+DELETE  /api/projects/{id}/
+```
+
+### Tasks
+```
+GET     /api/tasks/
+POST    /api/tasks/
+GET     /api/tasks/{id}/
+PUT     /api/tasks/{id}/
+PATCH   /api/tasks/{id}/
+DELETE  /api/tasks/{id}/
+```
+
+### Tasks scoped to a project (nested)
+```
+GET     /api/projects/{id}/tasks/
+```
+
+### Filtering and search
+```
+/api/tasks/?project=1
+/api/tasks/?status=todo
+/api/tasks/?project=1&status=in_progress
+/api/projects/?search=name
+/api/tasks/?search=text
+```
+
+### Pagination
+```
+/api/tasks/?page=2
+```
 
 ---
 
-## 🔹 Структура проекта
+## ⚡ Quick Start (Docker)
 
 ```bash
+git clone <repo>
+cd task_tracker
+cp .env.example .env
+docker-compose up --build
+```
+
+Apply migrations (once):
+```bash
+docker-compose exec web python manage.py migrate
+```
+
+Create a superuser (once):
+```bash
+docker-compose exec web python manage.py createsuperuser
+```
+
+Once running:
+- API: http://localhost:8000
+
+---
+
+## ⚙️ Installation (without Docker)
+
+```bash
+git clone <repo>
+cd task_tracker
+```
+
+### Create virtual environment
+```bash
+python -m venv venv
+source venv/bin/activate  # mac/linux
+venv\Scripts\activate     # windows
+```
+
+### Install dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### Apply migrations
+```bash
+python manage.py migrate
+```
+
+### Create superuser
+```bash
+python manage.py createsuperuser
+```
+
+### Run server
+```bash
+python manage.py runserver
+```
+
+---
+
+## 🗂 Project Structure
+
+```
 task_tracker/
 │
 ├── manage.py
-├── config/            # Django settings/urls
-├── api/               # приложение с моделями Project и Task + ViewSet/serializers
+├── config/            # Django settings, URLs
+├── api/               # Project and Task models, ViewSets, serializers
 ├── Dockerfile
 ├── docker-compose.yml
 ├── requirements.txt
@@ -166,10 +176,42 @@ task_tracker/
 
 ---
 
-## 🔹 Контакты / Автор
+## 🧠 Design Decisions
 
-Имя: Дмитрий (Neverdebug)
+- Flat and nested endpoints coexist with distinct responsibilities: `/api/tasks/` is used for global search and filtering across all tasks, while `/api/projects/{id}/tasks/` provides tasks in the context of a specific project
+- Data isolation is enforced via object-level permissions: a user can only access their own objects, even if they know someone else's ID
+- Task statuses are intentionally limited to three values (`todo`, `in_progress`, `done`) to keep filtering simple and avoid unnecessary complexity
 
-GitHub: https://github.com/cartmeroonm-pixel
+---
 
-Цель проекта: портфолио для junior backend разработчика
+## 📌 Future Improvements
+
+- Task deadlines and priorities
+- Task assignment to other users (team collaboration)
+- Notifications for approaching deadlines via email or Telegram
+
+---
+
+## 🎯 Project Purpose
+
+Built as a backend portfolio project to demonstrate:
+
+- REST API design with Django REST Framework
+- JWT authentication and object-level permissions
+- Working with nested resources and filtering
+- Docker containerization
+
+---
+
+## 📄 .env.example
+
+```
+DEBUG=True
+SECRET_KEY=your-secret-key
+
+DB_NAME=task_tracker
+DB_USER=postgres
+DB_PASSWORD=your_db_password
+DB_HOST=db
+DB_PORT=5432
+```
